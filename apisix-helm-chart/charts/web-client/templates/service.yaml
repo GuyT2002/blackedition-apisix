@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-webservice
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      targetPort: 8080
+      port: 80
+      protocol: TCP
+  selector:
+    app: simple-webserver

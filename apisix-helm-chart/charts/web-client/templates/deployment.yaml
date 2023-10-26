@@ -1,0 +1,28 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: simple-webserver
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-webserver
+  template:
+    metadata:
+      labels:
+        app: simple-webserver
+    spec:
+      containers:
+        - name: container
+          image: 'docker.io/ksonny4/simple-docker-http-server:latest'
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 200m
+              memory: 400Mi
+            requests:
+              cpu: 50m
+              memory: 400Mi

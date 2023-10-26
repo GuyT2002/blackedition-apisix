@@ -1,0 +1,48 @@
+helm repo add apisix https://charts.apiseven.com
+helm repo update
+helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix --create-namespace
+
+
+oc create sa apisix-sa
+oc adm policy add-scc-to-user privileged -z apisix-sa
+oc adm policy add-scc-to-user privileged -z default -n apisix-ingress-tests
+oc adm policy add-scc-to-user privileged -z apisix-sa -n apisix-ingress-tests
+oc adm policy add-scc-to-user anyuid -z apisix-sa
+oc adm policy add-scc-to-user anyuid -z apisix-sa -n apisix-ingress-tests
+helm repo add apisix https://charts.apiseven.com
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm install apisix apisix/apisix \
+  --set service.type=LoadBalancer \
+  --set etcd.enabled=true \
+  --set ingress-controller.enabled=false \
+  --set etcd.podSecurityContext.enabled=false \
+  --set etcd.containerSecurityContext.enabled=false \
+  --create-namespace \
+  --namespace apisix-ingress-tests \
+  --set apisix.admin.type=LoadBalancer \
+  --set apisix.admin.credentials.admin=qwe123 \
+  --set etcd.auth.token.enabled=false \
+  --set etcd.volumePermissions.enabled=true \
+  --set serviceAccount.name=apisix-sa \
+  --set apisix.nginx_config.user=root \
+  --set apisix.ssl.enabled=true 
+
+  --set ingress-controller.config.apisix.serviceNamespace=apisix-ingress-tests \
+  --set ingress-controller.config.apisix.adminAPIVersion=v3 \
+  --set ingress-controller.rbac.create=false
+  
+helm install apisix-dashboard apisix/apisix-dashboard --namespace apisix-ingress-tests \
+  --set service.type=LoadBalancer
+
+oc create sa apisix-sa
+oc adm policy add-scc-to-user privileged -z apisix-sa
+oc adm policy add-scc-to-user privileged -z default -n apisix-ingress-tests-3
+oc adm policy add-scc-to-user privileged -z apisix-sa -n apisix-ingress-tests-3
+oc adm policy add-scc-to-user anyuid -z apisix-sa
+oc adm policy add-scc-to-user anyuid -z apisix-sa -n apisix-ingress-tests-3
+
+
+
+helm install apisix-dashboard apisix/apisix-dashboard --namespace apisix-ingress-tests-3 \
+  --set service.type=LoadBalancer
